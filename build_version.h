@@ -1,0 +1,7 @@
+#ifndef __BUILD_VERSION_H
+#define __BUILD_VERSION_H
+
+#define BUILD_VERSION_MAJOR 1
+#define BUILD_VERSION_MINOR 0
+
+#endif
