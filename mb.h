@@ -56,7 +56,7 @@
 
 // Data Model Definitions
 #define MB_INPUTS 2
-#define MB_COILS 2
+#define MB_COILS 1
 #define MB_INPUT_REGISTERS 0
 #define MB_HOLDING_REGISTERS 0
 

@@ -24,6 +24,7 @@ int main() {
 		update_inputs();
 		mb_process();
 		update_outputs();
+		light_update();
 	}
 }
 

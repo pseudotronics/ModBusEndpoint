@@ -3,6 +3,7 @@
 #include <config.h>
 #include "bsp_functions.h"
 #include "pico/stdlib.h"
+#include "pico/time.h"
 #include <stdio.h>
 #include "mb.h"
 
@@ -10,15 +11,34 @@ static uint8_t s_input_state = 0;
 
 static bool s_output_state[NUM_OUTPUTS] = { false };
 static volatile bool s_changed = false;
+static bool light_enabled = false;
 static uint8_t s_debounce[2] = { 0, 0 };
 
 static uint32_t s_bsp_counters[2] = { 0 };
+
+static int light_timer = 0;
+static uint64_t light_timer_next = 0;
+#define FLASHING_INTERVAL_US 250000
 
 enum BSP_COUNTERS
 {
 	OUTPUT_1,
 	OUTPUT_2
 };
+
+void light_update()
+{
+	if (!light_enabled) { return; }
+	if (time_us_64() > light_timer_next)
+	{
+		bool state = gpio_get(OUTPUT_2_PIN);
+		gpio_put(OUTPUT_2_PIN, !state);
+		light_timer++;
+		light_timer_next = time_us_64() + FLASHING_INTERVAL_US;
+		if (light_timer > 40 && state) { light_enabled = false; }	
+	}
+
+}
 
 void bsp_setup_pins()
 {
@@ -93,9 +113,14 @@ void pulse_output(uint8_t channel)
 	if (channel == 0)
 	{
 		gpio_put(OUTPUT_1_PIN, true);
+		gpio_put(OUTPUT_2_PIN, true);
 		sleep_ms(PULSE_TIME_MS);
 		gpio_put(OUTPUT_1_PIN, false);
 		s_bsp_counters[OUTPUT_1]++;
+		light_timer = 0;
+		light_enabled = true;
+		light_timer_next = time_us_64() + FLASHING_INTERVAL_US;
+		//add_repeating_timer_ms(500, light_callback, NULL, &timer);
 	}
 	else if (channel == 1)
 	{
@@ -103,10 +128,6 @@ void pulse_output(uint8_t channel)
 		sleep_ms(PULSE_TIME_MS);
 		gpio_put(OUTPUT_2_PIN, false);
 		s_bsp_counters[OUTPUT_2]++;
-	}
-	else
-	{
-		return;
 	}
 }
 

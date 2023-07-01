@@ -29,6 +29,8 @@ extern "C" {
 	void update_outputs();
 	
 	void print_bsp_stats();
+	
+	void light_update();
 
 #ifdef __cplusplus
 }
